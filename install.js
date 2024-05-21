@@ -6,7 +6,6 @@ import AdmZip from 'adm-zip';
 import inquirer from 'inquirer';
 import { exec } from 'child_process';
 import { promisify } from 'util';
-import { chalk } from 'chalk'
 const execAsync = promisify(exec);
 
 // Configuration
@@ -76,7 +75,7 @@ async function extractZip(zipPath, dest) {
 
 async function promptUserToUpdate() {
     console.clear('')
-    console.log(chalk.bold.yellow('ea Contact Manager Installer'))
+    console.log('ea Contact Manager Installer')
     console.log('')
     const answers = await inquirer.prompt([
         {
