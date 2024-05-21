@@ -1,0 +1,112 @@
+import fetch from 'node-fetch';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import AdmZip from 'adm-zip';
+import inquirer from 'inquirer';
+import { exec } from 'child_process';
+import { promisify } from 'util';
+const execAsync = promisify(exec);
+
+// Configuration
+const repoOwner = 'DangerMounce';
+const repoName = 'ea_con_gen';
+const branchName = 'main';
+const downloadUrl = `https://github.com/${repoOwner}/${repoName}/archive/refs/heads/${branchName}.zip`;
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const updateDir = __dirname;  // Change this to update directly in the current directory
+const versionFilePath = path.resolve(updateDir, 'version.log');
+const installJsPath = path.resolve(updateDir, 'install.js'); // Path to the install.js file to be deleted
+
+async function checkForUpdates() {
+    console.clear();
+    console.log('Checking for updates...');
+    const updateAgreed = await promptUserToUpdate();
+    if (updateAgreed) {
+        await updateRepository();
+        console.log('Update completed successfully.');
+        console.log('Please restart the script to apply the updates.');
+        process.exit(0);  // Changed to exit code 0 for successful completion
+    }
+}
+
+async function updateRepository() {
+    try {
+        const zipPath = path.resolve(__dirname, 'repo.zip');
+        await downloadFile(downloadUrl, zipPath);
+        await extractZip(zipPath, updateDir);
+        fs.unlinkSync(zipPath);  // Clean up the zip file after extraction
+        fs.unlinkSync(installJsPath); // Delete install.js file
+        console.log('Repository updated successfully.');
+    } catch (error) {
+        console.error('Error updating the repository:', error);
+    }
+}
+
+async function downloadFile(url, dest) {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`Failed to fetch ${url}: ${response.statusText}`);
+    const fileStream = fs.createWriteStream(dest);
+    await new Promise((resolve, reject) => {
+        response.body.pipe(fileStream);
+        response.body.on('error', (err) => reject(err));
+        fileStream.on('finish', () => resolve());
+    });
+}
+
+async function extractZip(zipPath, dest) {
+    const zip = new AdmZip(zipPath);
+    const tempDir = path.resolve(dest, 'temp');
+    zip.extractAllTo(tempDir, true);
+    const extractedDir = path.resolve(tempDir, `${repoName}-${branchName}`);
+    const files = fs.readdirSync(extractedDir);
+    for (const file of files) {
+        const srcPath = path.resolve(extractedDir, file);
+        const destPath = path.resolve(dest, file);
+        if (fs.existsSync(destPath)) {
+            fs.rmSync(destPath, { recursive: true, force: true });
+        }
+        fs.renameSync(srcPath, destPath);
+        console.log(`Updated ${destPath}...`);
+    }
+    fs.rmSync(tempDir, { recursive: true, force: true }); // Clean up temporary directory
+}
+
+async function promptUserToUpdate() {
+    const answers = await inquirer.prompt([
+        {
+            type: 'confirm',
+            name: 'confirmation',
+            message: 'A new version of Contact Manager is available. Do you want to update now?',
+            default: false
+        }
+    ]);
+    return answers.confirmation;
+}
+
+async function installNpmPackages() {
+    const packages = [
+        'btoa', 'chalk', 'fs', 'openai', 'dotenv',
+        'fluent-ffmpeg', 'ffmpeg-static', 'ffprobe-static',
+        'path', 'axios', 'form-data', 'readline-sync', 'music-metadata'
+    ];
+    const packagesString = packages.join(' ');
+
+    try {
+        console.log(`Installing packages: ${packagesString}`);
+        const { stdout, stderr } = await execAsync(`npm install ${packagesString}`);
+        console.log(stdout);
+        if (stderr) {
+            console.error('Errors during npm install:', stderr);
+        } else {
+            console.log('All packages installed successfully.');
+        }
+    } catch (error) {
+        console.error('Failed to install packages:', error);
+    }
+}
+
+// Call the function to install the packages
+installNpmPackages();
+
+// checkForUpdates();
