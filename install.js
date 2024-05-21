@@ -97,7 +97,7 @@ async function installNpmPackages() {
     const packagesString = packages.join(' ');
 
     try {
-        console.log(`Installing packages: ${packagesString}`);
+        console.log(`Installing packages...`);
         const { stdout, stderr } = await execAsync(`npm install ${packagesString}`);
         console.log(stdout);
         if (stderr) {
