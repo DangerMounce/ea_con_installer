@@ -24,8 +24,8 @@ async function checkForUpdates() {
     const updateAgreed = await promptUserToUpdate();
     if (updateAgreed) {
         await updateRepository();
-        console.log('Update completed successfully.');
-        console.log('Please restart the script to apply the updates.');
+        console.log('Install completed successfully.');
+        console.log('Type "/n node gen help/n"');
         process.exit(0);  // Changed to exit code 0 for successful completion
     }
 }
@@ -37,9 +37,9 @@ async function updateRepository() {
         await extractZip(zipPath, updateDir);
         fs.unlinkSync(zipPath);  // Clean up the zip file after extraction
         fs.unlinkSync(installJsPath); // Delete install.js file
-        console.log('Repository updated successfully.');
+        console.log('Repository installed successfully.');
     } catch (error) {
-        console.error('Error updating the repository:', error);
+        console.error('Error installing the repository:', error);
     }
 }
 
@@ -77,7 +77,7 @@ async function promptUserToUpdate() {
         {
             type: 'confirm',
             name: 'confirmation',
-            message: 'A new version of Contact Manager is available. Do you want to update now?',
+            message: 'Install ea Contact Manager?',
             default: false
         }
     ]);
