@@ -6,6 +6,7 @@ import AdmZip from 'adm-zip';
 import inquirer from 'inquirer';
 import { exec } from 'child_process';
 import { promisify } from 'util';
+import { chalk } from 'chalk'
 const execAsync = promisify(exec);
 
 // Configuration
@@ -23,6 +24,7 @@ async function checkForUpdates() {
     console.log('Checking for updates...');
     const updateAgreed = await promptUserToUpdate();
     if (updateAgreed) {
+        await installNpmPackages();
         await updateRepository();
         console.log('Install completed successfully.');
         console.log('Type "/n node gen help/n"');
@@ -73,6 +75,9 @@ async function extractZip(zipPath, dest) {
 }
 
 async function promptUserToUpdate() {
+    console.clear('')
+    console.log(chalk.bold.yellow('ea Contact Manager Installer'))
+    console.log('')
     const answers = await inquirer.prompt([
         {
             type: 'confirm',
@@ -107,6 +112,5 @@ async function installNpmPackages() {
 }
 
 // Call the function to install the packages
-installNpmPackages();
 
-// checkForUpdates();
+checkForUpdates();
