@@ -26,7 +26,7 @@ async function checkForUpdates() {
         await installNpmPackages();
         await updateRepository();
         console.log('Install completed successfully.');
-        console.log('Type "/n node gen help/n"');
+        console.log('Type: node gen help');
         process.exit(0);  // Changed to exit code 0 for successful completion
     }
 }
