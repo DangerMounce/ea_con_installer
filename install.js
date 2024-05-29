@@ -75,13 +75,13 @@ async function extractZip(zipPath, dest) {
 
 async function promptUserToUpdate() {
     console.clear('')
-    console.log('ea Contact Manager Installer')
+    console.log('ea_con_gen Installer v1.1')
     console.log('')
     const answers = await inquirer.prompt([
         {
             type: 'confirm',
             name: 'confirmation',
-            message: 'Install ea Contact Manager?',
+            message: 'Install ea_con_gen?',
             default: false
         }
     ]);
